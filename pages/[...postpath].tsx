@@ -9,9 +9,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const referringURL = ctx.req.headers?.referer || null;
   const pathArr = ctx.query.postpath as Array<string>;
   const path = pathArr.join("/");
-  console.log(path);
   const fbclid = ctx.query.fbclid;
+  console.log(path);
   console.log(referringURL);
+  console.log(endpoint.replace(/\bgraphql\b/g, ""));
 
   // redirect if facebook is the referer or request contains fbclid
   if (referringURL?.includes("facebook.com") || fbclid) {
@@ -19,11 +20,12 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       redirect: {
         permanent: false,
         destination: `${
-          endpoint.replace(/(\/graphql\/)/, "/") + encodeURI(path as string)
+          endpoint.replace(/\bgraphql\b/g, "") + encodeURI(path as string)
         }`,
       },
     };
   }
+
   const query = gql`
 		{
 			post(id: "/${path}/", idType: URI) {
@@ -55,6 +57,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       notFound: true,
     };
   }
+
   return {
     props: {
       path,
